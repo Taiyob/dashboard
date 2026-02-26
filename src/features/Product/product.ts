@@ -57,8 +57,8 @@ export const productsApi = createApi({
     }),
 
     slugProduct: builder.query({
-      query: () => ({
-        url: `/products/slug/make-up-box`,
+      query: (slug) => ({
+        url: `/products/slug/${slug}`,
         method: "GET",
       }),
       providesTags: ["Product"],

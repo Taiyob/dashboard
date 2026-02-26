@@ -52,14 +52,15 @@ function CreateCategory({ trigger }: { trigger: React.ReactNode }) {
 
   const onSubmit = async (data: CategoryFormInput) => {
     try {
-      const payload = {
-        name: data.name,
-        description: data.description,
-        ...(data.imageUrl && { imageUrl: data.imageUrl }),
-      };
+      const formData = new FormData();
+      formData.append("name", data.name);
+      formData.append("description", data.description);
 
-      const res = await createCategory(payload).unwrap();
-      console.log("[category create response]", res);
+      if (data.image instanceof File) {
+        formData.append("image", data.image);
+      }
+
+      await createCategory(formData).unwrap();
 
       toast.success("Category created successfully");
       form.reset();
@@ -82,13 +83,14 @@ function CreateCategory({ trigger }: { trigger: React.ReactNode }) {
       <DrawerContent>
         <DrawerHeader>
           <DrawerTitle>Create Category</DrawerTitle>
-          <DrawerDescription>Create category for product</DrawerDescription>
+          <DrawerDescription>
+            Add a new category for your products.
+          </DrawerDescription>
         </DrawerHeader>
 
         <div className="px-4 overflow-y-auto">
           <Form {...form}>
             <form className="space-y-5">
-              {/* Category Name */}
               <FormField
                 control={form.control}
                 name="name"
@@ -103,7 +105,6 @@ function CreateCategory({ trigger }: { trigger: React.ReactNode }) {
                 )}
               />
 
-              {/* Description */}
               <FormField
                 control={form.control}
                 name="description"
@@ -112,7 +113,7 @@ function CreateCategory({ trigger }: { trigger: React.ReactNode }) {
                     <FormLabel>Description</FormLabel>
                     <FormControl>
                       <Textarea
-                        placeholder="Describe the category..."
+                        placeholder="Short description of the category..."
                         {...field}
                       />
                     </FormControl>
@@ -123,7 +124,7 @@ function CreateCategory({ trigger }: { trigger: React.ReactNode }) {
 
               <FormField
                 control={form.control}
-                name="imageUrl"
+                name="image"
                 render={({ field: { onChange, ...field } }) => (
                   <FormItem>
                     <FormLabel>Category Image</FormLabel>
@@ -134,13 +135,12 @@ function CreateCategory({ trigger }: { trigger: React.ReactNode }) {
                         onChange={(e) => {
                           const file = e.target.files?.[0];
                           if (file) {
+                            onChange(file);
                             const reader = new FileReader();
                             reader.onloadend = () => {
                               setImagePreview(reader.result as string);
                             };
                             reader.readAsDataURL(file);
-                          } else {
-                            setImagePreview(null);
                           }
                         }}
                         {...field}

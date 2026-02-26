@@ -12,14 +12,14 @@ import {
   TableRow,
   TableCell,
 } from '@/components/ui/table';
-import {Button} from '@/components/ui/button';
+import { Button } from '@/components/ui/button';
 import {
   IconChevronLeft,
   IconChevronRight,
   IconChevronsLeft,
   IconChevronsRight,
 } from '@tabler/icons-react';
-import {Label} from '@/components/ui/label';
+import { Label } from '@/components/ui/label';
 import {
   Select,
   SelectContent,
@@ -27,15 +27,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { Loader } from '@/components/ui/loader';
 
 interface DataTableProps<T> {
   columns: ColumnDef<T, unknown>[]; // ✅ replaced `any` with `unknown`
   data: T[];
   totalRows: number;
   totalPages: number;
-  pagination: {pageIndex: number; pageSize: number};
+  pagination: { pageIndex: number; pageSize: number };
   onPaginationChange: React.Dispatch<
-    React.SetStateAction<{pageIndex: number; pageSize: number}>
+    React.SetStateAction<{ pageIndex: number; pageSize: number }>
   >;
 
   isLoading?: boolean;
@@ -55,7 +56,7 @@ export function DataTable<T extends object>({
     getCoreRowModel: getCoreRowModel(),
     manualPagination: true,
     pageCount: totalPages,
-    state: {pagination},
+    state: { pagination },
     onPaginationChange: (updater) => {
       if (typeof updater === 'function') {
         onPaginationChange(updater(pagination));
@@ -87,8 +88,10 @@ export function DataTable<T extends object>({
         <TableBody>
           {isLoading ? (
             <TableRow>
-              <TableCell colSpan={columns.length} className="text-center">
-                Loading...
+              <TableCell colSpan={columns.length} className="h-24 text-center">
+                <div className="flex justify-center items-center">
+                  <Loader size="md" />
+                </div>
               </TableCell>
             </TableRow>
           ) : data.length ? (
@@ -123,7 +126,7 @@ export function DataTable<T extends object>({
           <Select
             value={`${pagination.pageSize}`}
             onValueChange={(v) =>
-              onPaginationChange({...pagination, pageSize: +v})
+              onPaginationChange({ ...pagination, pageSize: +v })
             }>
             <SelectTrigger className="w-20">
               <SelectValue placeholder={pagination.pageSize} />
@@ -141,7 +144,7 @@ export function DataTable<T extends object>({
             <Button
               variant="outline"
               className="h-8 w-8"
-              onClick={() => onPaginationChange({...pagination, pageIndex: 0})}
+              onClick={() => onPaginationChange({ ...pagination, pageIndex: 0 })}
               disabled={pagination.pageIndex === 0}>
               <IconChevronsLeft size={16} />
             </Button>
@@ -173,7 +176,7 @@ export function DataTable<T extends object>({
               variant="outline"
               className="h-8 w-8"
               onClick={() =>
-                onPaginationChange({...pagination, pageIndex: totalPages - 1})
+                onPaginationChange({ ...pagination, pageIndex: totalPages - 1 })
               }
               disabled={pagination.pageIndex >= totalPages - 1}>
               <IconChevronsRight size={16} />

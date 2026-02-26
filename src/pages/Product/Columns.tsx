@@ -12,6 +12,20 @@ import {
 } from "@/components/ui/dropdown-menu";
 import type { IProduct } from "./type";
 import EditProduct from "./EditProduct";
+import { useDeleteProductMutation } from "@/features/Product/product";
+import { toast } from "sonner";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { useState } from "react";
 
 // import PlanStatusCell from "./PlanStatusCell";
 // import EditPlan from "./EditPlan";
@@ -31,16 +45,31 @@ export const columns: ColumnDef<IProduct>[] = [
 
   //  Product
   {
-    header: "Name",
+    header: "Product",
     cell: ({ row }) => {
       const product = row.original;
 
       return (
-        <div className="flex flex-col max-w-[320px]">
-          <span className="font-medium">{product.name}</span>
-          <span className="text-xs text-muted-foreground line-clamp-2">
-            {product.description}
-          </span>
+        <div className="flex items-center gap-3 max-w-[400px]">
+          <div className="h-10 w-10 rounded-md border overflow-hidden flex-shrink-0">
+            {product.featuredImage ? (
+              <img
+                src={product.featuredImage}
+                alt={product.name}
+                className="h-full w-full object-cover"
+              />
+            ) : (
+              <div className="h-full w-full bg-muted flex items-center justify-center text-[10px] text-muted-foreground text-center p-1">
+                No image
+              </div>
+            )}
+          </div>
+          <div className="flex flex-col truncate">
+            <span className="font-medium truncate">{product.name}</span>
+            <span className="text-xs text-muted-foreground line-clamp-1">
+              {product.description}
+            </span>
+          </div>
         </div>
       );
     },
@@ -54,14 +83,12 @@ export const columns: ColumnDef<IProduct>[] = [
 
       return (
         <div className="flex flex-col">
-          <span className="font-medium">
-            ${product.price}
-            <span className="text-xs text-muted-foreground"> / month</span>
-          </span>
-
-          {/* <span className="text-xs text-muted-foreground">
-            ${product.limits.pricing.annualAmount} / year
-          </span> */}
+          <span className="font-medium">${product.price}</span>
+          {product.discountPrice > 0 && (
+            <span className="text-xs text-muted-foreground line-through">
+              ${product.discountPrice}
+            </span>
+          )}
         </div>
       );
     },
@@ -162,6 +189,14 @@ export const columns: ColumnDef<IProduct>[] = [
   //     ),
   //   },
 
+  //  Category
+  {
+    header: "Category",
+    cell: ({ row }) => (
+      <span className="capitalize">{row.original.category?.name || "N/A"}</span>
+    ),
+  },
+
   //  Created
   {
     accessorKey: "createdAt",
@@ -173,41 +208,84 @@ export const columns: ColumnDef<IProduct>[] = [
   {
     id: "actions",
     header: "Actions",
-    cell: ({ row }) => {
-      const product = row.original;
-
-      return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0">
-              <MoreHorizontal className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-
-          <DropdownMenuContent align="end" className="py-3">
-            {/* <DropdownMenuItem>View Plan</DropdownMenuItem> */}
-
-            {/* ✅ Edit – SAME LOOK, proper behavior */}
-            <EditProduct
-              item={product}
-              trigger={
-                <DropdownMenuItem
-                  onSelect={(e) => e.preventDefault()}
-                  className="cursor-pointer"
-                >
-                  <Edit /> Edit Plan
-                </DropdownMenuItem>
-              }
-            />
-
-            <DropdownMenuSeparator />
-
-            <DropdownMenuItem className="text-destructive cursor-pointer">
-              <Trash /> Delete Product
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      );
-    },
+    cell: ({ row }) => <CellAction data={row.original} />,
   },
 ];
+
+const CellAction = ({ data }: { data: IProduct }) => {
+  const [open, setOpen] = useState(false);
+  const [deleteProduct, { isLoading }] = useDeleteProductMutation();
+
+  const onDelete = async () => {
+    try {
+      console.log("[Delete Action] Attempting to delete product with ID:", data.id);
+      const res = await deleteProduct(data.id).unwrap();
+      console.log("[Delete Action] Response from server:", res);
+      toast.success("Product deleted successfully");
+      setOpen(false);
+    } catch (err: any) {
+      console.error("[Delete Action] Error:", err);
+      toast.error(err?.data?.message || "Failed to delete product");
+    }
+  };
+
+  return (
+    <>
+      <AlertDialog open={open} onOpenChange={setOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete the
+              product "{data.name}" from the servers.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isLoading}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => {
+                e.preventDefault();
+                onDelete();
+              }}
+              disabled={isLoading}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {isLoading ? "Deleting..." : "Continue"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" className="h-8 w-8 p-0">
+            <MoreHorizontal className="h-4 w-4" />
+          </Button>
+        </DropdownMenuTrigger>
+
+        <DropdownMenuContent align="end" className="py-3">
+          <EditProduct
+            item={data}
+            trigger={
+              <DropdownMenuItem
+                onSelect={(e) => e.preventDefault()}
+                className="cursor-pointer"
+              >
+                <Edit className="mr-2 h-4 w-4" /> Edit Product
+              </DropdownMenuItem>
+            }
+          />
+
+          <DropdownMenuSeparator />
+
+          <DropdownMenuItem
+            onClick={() => setOpen(true)}
+            className="text-destructive cursor-pointer"
+          >
+            <Trash className="mr-2 h-4 w-4" /> Delete Product
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </>
+  );
+};

@@ -1,4 +1,4 @@
-import { createBrowserRouter } from "react-router";
+import { createBrowserRouter, Navigate } from "react-router";
 import Dashboard from "@/pages/Dashboard/Dashboard";
 import DashboardLayout from "@/layout/dashboard-layout";
 import Users from "@/pages/Users/Users";
@@ -8,6 +8,8 @@ import Epmloyees from "@/pages/Epmloyees/Epmloyees";
 import Courses from "@/pages/Course/Courses";
 import Category from "@/pages/Category/Category";
 import Product from "@/pages/Product/Product";
+import { ProtectedRoute } from "@/layout/protected-route";
+import { PublicRoute } from "@/layout/public-route";
 
 const router = createBrowserRouter([
   {
@@ -15,20 +17,28 @@ const router = createBrowserRouter([
     children: [
       {
         index: true,
-        element: <LoginPage />,
+        element: (
+          <PublicRoute>
+            <LoginPage />
+          </PublicRoute>
+        ),
       },
       {
         path: "/login",
-        element: <LoginPage />,
+        element: (
+          <PublicRoute>
+            <LoginPage />
+          </PublicRoute>
+        ),
       },
     ],
   },
   {
     path: "/dashboard",
     element: (
-      // <ProtectedRoute>
-      <DashboardLayout />
-      // </ProtectedRoute>
+      <ProtectedRoute>
+        <DashboardLayout />
+      </ProtectedRoute>
     ),
     children: [
       {
@@ -61,7 +71,7 @@ const router = createBrowserRouter([
       },
       {
         path: "*",
-        element: <h1>404</h1>,
+        element: <Navigate to="/dashboard" replace />,
       },
     ],
   },

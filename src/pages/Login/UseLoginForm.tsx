@@ -1,22 +1,22 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import {useState} from 'react';
-import {useForm} from 'react-hook-form';
-import {zodResolver} from '@hookform/resolvers/zod';
-import {useNavigate} from 'react-router';
+import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useNavigate } from 'react-router';
 import toast from 'react-hot-toast';
-import {loginFormSchema, type LoginFormData} from './type';
-import {useLoginMutation} from '@/features/auth/authApi';
+import { loginFormSchema, type LoginFormData } from './type';
+import { useLoginMutation } from '@/features/auth/authApi';
 
 export const useLoginForm = () => {
   const [showPassword, setShowPassword] = useState(false);
-  const [login, {isLoading, isSuccess, isError, error}] = useLoginMutation();
+  const [login, { isLoading, isSuccess, isError, error }] = useLoginMutation();
   const navigate = useNavigate();
 
   const {
     register,
     handleSubmit,
-    formState: {errors},
+    formState: { errors },
     setValue,
     trigger,
     watch,
@@ -43,7 +43,7 @@ export const useLoginForm = () => {
       // }, 500);
 
       const res = await login({
-        email: values.email,
+        identifier: values.email,
         password: values.password,
       }).unwrap();
       console.log('Login success:', res);
@@ -51,7 +51,7 @@ export const useLoginForm = () => {
       if (res.success) {
         toast.success('Login successful! Redirecting...');
         setTimeout(() => {
-          navigate('/dashboard', {replace: true});
+          navigate('/dashboard', { replace: true });
         }, 500);
       }
     } catch (err: any) {
@@ -62,7 +62,7 @@ export const useLoginForm = () => {
 
   // Helper to safely update terms + trigger validation
   const handleTermsChange = (checked: boolean) => {
-    setValue('terms', checked, {shouldValidate: true});
+    setValue('terms', checked, { shouldValidate: true });
   };
 
   return {

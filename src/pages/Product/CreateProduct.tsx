@@ -35,17 +35,18 @@ import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import { useState } from "react";
-import { ProductCreateSchema } from "../Category/type";
 import { useCreateProductMutation } from "@/features/Product/product";
 import { useCategoriesQuery } from "@/features/Category/category";
 import type z from "zod";
+import { ProductCreateSchema } from "./type";
 
 function CreateProduct({ trigger }: { trigger: React.ReactNode }) {
   const isMobile = useIsMobile();
   const [open, setOpen] = useState(false);
   const [createProduct, { isLoading }] = useCreateProductMutation();
-  const { data: categories = [], isLoading: isCategoriesLoading } =
+  const { data: categoriesData, isLoading: isCategoriesLoading } =
     useCategoriesQuery({});
+  const categories = categoriesData?.data || [];
 
   const form = useForm<z.infer<typeof ProductCreateSchema>>({
     resolver: zodResolver(ProductCreateSchema),
@@ -56,15 +57,29 @@ function CreateProduct({ trigger }: { trigger: React.ReactNode }) {
       discountPrice: 0,
       stock: 1,
       sku: "",
-      featuredImage: "www.image.com",
+      featuredImage: undefined,
       isFeatured: false,
-      categoryId: "5166cd34-a400-454b-880f-2850c1ab4f13",
+      categoryId: "",
     },
   });
 
   const onSubmit = async (data: any) => {
     try {
-      const res = await createProduct(data).unwrap();
+      const formData = new FormData();
+      Object.keys(data).forEach((key) => {
+        const value = (data as any)[key];
+        if (key === "id") return;
+
+        if (key === "featuredImage") {
+          if (value instanceof File) {
+            formData.append(key, value);
+          }
+        } else if (value !== undefined && value !== null) {
+          formData.append(key, value.toString());
+        }
+      });
+
+      const res = await createProduct(formData).unwrap();
       console.log("[product create response]", res);
       toast.success("Product created successfully");
       form.reset();
@@ -217,14 +232,20 @@ function CreateProduct({ trigger }: { trigger: React.ReactNode }) {
               <FormField
                 control={form.control}
                 name="featuredImage"
-                render={({ field }) => (
+                render={({ field: { value, onChange, ...fieldProps } }) => (
                   <FormItem>
-                    <FormLabel>Featured Image URL</FormLabel>
+                    <FormLabel>Featured Image</FormLabel>
                     <FormControl>
                       <Input
-                        placeholder="https://example.com/image.jpg"
-                        {...field}
-                        value={field.value ?? ""}
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            onChange(file);
+                          }
+                        }}
+                        {...fieldProps}
                       />
                     </FormControl>
                     <FormMessage />

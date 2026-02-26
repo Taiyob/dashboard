@@ -1,7 +1,7 @@
 // src/features/auth/authSlice.ts
-import type {TUser} from '@/pages/Users/type';
-import {createSlice, type PayloadAction} from '@reduxjs/toolkit';
-import {jwtDecode} from 'jwt-decode';
+import type { TUser } from '@/pages/Users/type';
+import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
+import { jwtDecode } from 'jwt-decode';
 
 interface JwtPayload {
   id: string;
@@ -20,14 +20,40 @@ interface AuthState {
   user: TUser | null;
 }
 
-const initialState: AuthState = {
-  token: localStorage.getItem('token'),
-  isAuthenticated: Boolean(localStorage.getItem('token')),
-  isLoading: false,
-  role: null,
-  userId: null,
-  user: null,
-};
+// Decode any existing token from localStorage on startup
+function getInitialState(): AuthState {
+  const token = localStorage.getItem('token');
+  if (token) {
+    try {
+      const decoded = jwtDecode<JwtPayload>(token);
+      // Check if the token is expired
+      if (decoded.exp * 1000 > Date.now()) {
+        return {
+          token,
+          isAuthenticated: true,
+          isLoading: false,
+          role: decoded.role,
+          userId: decoded.id,
+          user: null,
+        };
+      }
+      // Token expired — clean up
+      localStorage.removeItem('token');
+    } catch {
+      localStorage.removeItem('token');
+    }
+  }
+  return {
+    token: null,
+    isAuthenticated: false,
+    isLoading: false,
+    role: null,
+    userId: null,
+    user: null,
+  };
+}
+
+const initialState: AuthState = getInitialState();
 
 const authSlice = createSlice({
   name: 'auth',
@@ -35,11 +61,11 @@ const authSlice = createSlice({
   reducers: {
     setCredentials: (
       state,
-      action: PayloadAction<{token: string; user: TUser}>
+      action: PayloadAction<{ token: string; user: TUser }>
     ) => {
       console.log('action payload', action.payload);
 
-      const {token, user} = action.payload;
+      const { token, user } = action.payload;
       state.token = token;
       state.isAuthenticated = true;
       state.user = user;
@@ -71,5 +97,5 @@ const authSlice = createSlice({
   },
 });
 
-export const {setCredentials, logout, setLoading} = authSlice.actions;
+export const { setCredentials, logout, setLoading } = authSlice.actions;
 export default authSlice.reducer;

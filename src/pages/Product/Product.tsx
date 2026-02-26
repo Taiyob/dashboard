@@ -20,11 +20,11 @@ export default function Product() {
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
 
   const sortOptions = [
-    { value: "displayName", label: "Name" },
-    { value: "email", label: "Email" },
+    { value: "name", label: "Name" },
+    { value: "price", label: "Price" },
+    { value: "stock", label: "Stock" },
     { value: "createdAt", label: "Created At" },
     { value: "updatedAt", label: "Updated At" },
-    { value: "role", label: "Role" },
     { value: "status", label: "Status" },
   ];
 

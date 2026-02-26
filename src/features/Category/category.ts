@@ -12,17 +12,17 @@ export const categoriesApi = createApi({
         url: "/categories",
         method: "GET",
         params,
-        //params: { ...params },
       }),
-      providesTags: ["Category"],
-    }),
-
-    plan: builder.query({
-      query: (id) => ({
-        url: `/plans/${id}`,
-        method: "GET",
-      }),
-      providesTags: ["Category"],
+      providesTags: (result) =>
+        result?.data
+          ? [
+            ...result.data.map(({ id }: { id: string }) => ({
+              type: "Category" as const,
+              id,
+            })),
+            { type: "Category", id: "LIST" },
+          ]
+          : [{ type: "Category", id: "LIST" }],
     }),
 
     createCategory: builder.mutation({
@@ -31,16 +31,19 @@ export const categoriesApi = createApi({
         method: "POST",
         data,
       }),
-      invalidatesTags: ["Category"],
+      invalidatesTags: [{ type: "Category", id: "LIST" }],
     }),
 
     updateCategory: builder.mutation({
       query: ({ id, data }) => ({
         url: `/categories/${id}`,
         method: "PUT",
-        data: data,
+        data,
       }),
-      invalidatesTags: ["Category"],
+      invalidatesTags: (result, error, { id }) => [
+        { type: "Category", id },
+        { type: "Category", id: "LIST" },
+      ],
     }),
 
     updateCategoryStatus: builder.mutation({
@@ -49,7 +52,10 @@ export const categoriesApi = createApi({
         method: "PATCH",
         data: { status },
       }),
-      invalidatesTags: ["Category"],
+      invalidatesTags: (result, error, { id }) => [
+        { type: "Category", id },
+        { type: "Category", id: "LIST" },
+      ],
     }),
 
     deleteCategory: builder.mutation({
@@ -57,14 +63,16 @@ export const categoriesApi = createApi({
         url: `/categories/${id}`,
         method: "DELETE",
       }),
-      invalidatesTags: ["Category"],
+      invalidatesTags: (result, error, id) => [
+        { type: "Category", id },
+        { type: "Category", id: "LIST" },
+      ],
     }),
   }),
 });
 
 export const {
   useCategoriesQuery,
-  usePlanQuery,
   useCreateCategoryMutation,
   useUpdateCategoryMutation,
   useUpdateCategoryStatusMutation,

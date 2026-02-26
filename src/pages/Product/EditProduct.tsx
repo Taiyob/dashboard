@@ -33,9 +33,17 @@ import { Textarea } from "@/components/ui/textarea";
 // } from '@/components/ui/select';
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { useUpdatePlanMutation } from "@/features/plans/plansApi";
-// import {LIMIT_BOOL_LABELS, LIMIT_LABELS} from './limitLabel';
+import { useUpdateProductMutation } from "@/features/Product/product";
+import { useCategoriesQuery } from "@/features/Category/category";
 import { ProductEditSchema, type ProductEditType } from "./type";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
 
 type Props = {
   item: ProductEditType;
@@ -46,9 +54,12 @@ const EditProduct = ({ item, trigger }: Props) => {
   const isMobile = useIsMobile();
   const [open, setOpen] = useState(false);
 
-  const [updatePlan, { isLoading }] = useUpdatePlanMutation();
+  const [updateProduct, { isLoading }] = useUpdateProductMutation();
+  const { data: categoriesData, isLoading: isCategoriesLoading } =
+    useCategoriesQuery({});
+  const categories = categoriesData?.data || [];
 
-  console.log("[plan] : ", item);
+  console.log("[product] : ", item);
 
   const form = useForm<ProductEditType>({
     resolver: zodResolver(ProductEditSchema),
@@ -56,27 +67,40 @@ const EditProduct = ({ item, trigger }: Props) => {
   });
 
   useEffect(() => {
-    if (open) {
-      form.reset(item);
+    if (open && item) {
+      const initialValues = {
+        ...item,
+        categoryId: (item as any).category?.id || item.categoryId,
+      };
+      form.reset(initialValues);
     }
   }, [open, item, form]);
 
   const onSubmit = async (data: ProductEditType) => {
-    // const {id, ...data} = values;
-
     try {
-      await updatePlan({
+      const formData = new FormData();
+      Object.keys(data).forEach((key) => {
+        const value = (data as any)[key];
+        if (key === "id") return;
+
+        if (key === "featuredImage") {
+          if (value instanceof File) {
+            formData.append(key, value);
+          }
+        } else if (value !== undefined && value !== null) {
+          formData.append(key, value.toString());
+        }
+      });
+
+      await updateProduct({
         id: item?.id,
-        data: {
-          ...data,
-          id: undefined,
-        },
+        data: formData,
       }).unwrap();
 
-      toast.success("Plan updated successfully");
+      toast.success("Product updated successfully");
       setOpen(false);
     } catch (error: any) {
-      toast.error(error?.data?.message || "Failed to update plan");
+      toast.error(error?.data?.message || "Failed to update product");
     }
   };
 
@@ -91,21 +115,20 @@ const EditProduct = ({ item, trigger }: Props) => {
       <DrawerContent>
         <DrawerHeader>
           <DrawerTitle>{item.name}</DrawerTitle>
-          <DrawerDescription>Edit plan details</DrawerDescription>
+          <DrawerDescription>Edit product details</DrawerDescription>
         </DrawerHeader>
 
         <div className="px-4 overflow-y-auto">
           <Form {...form}>
             <form className="space-y-5">
-              {/* Plan Name */}
               <FormField
                 control={form.control}
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Plan Name</FormLabel>
+                    <FormLabel>Product Name</FormLabel>
                     <FormControl>
-                      <Input placeholder="Plan name" {...field} />
+                      <Input placeholder="Product name" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -120,27 +143,185 @@ const EditProduct = ({ item, trigger }: Props) => {
                   <FormItem>
                     <FormLabel>Description</FormLabel>
                     <FormControl>
-                      <Textarea {...field} />
+                      <Textarea {...field} className="min-h-24" />
                     </FormControl>
+                    <FormMessage />
                   </FormItem>
                 )}
               />
 
-              {/* Price */}
+              {/* Price & Discount */}
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="price"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Price ($)</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          min={0}
+                          step="0.01"
+                          value={field.value ?? ""}
+                          onChange={(e) =>
+                            field.onChange(Number(e.target.value) || 0)
+                          }
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="discountPrice"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Discount Price ($)</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          min={0}
+                          step="0.01"
+                          value={field.value ?? ""}
+                          onChange={(e) =>
+                            field.onChange(Number(e.target.value) || 0)
+                          }
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
 
+              {/* Stock & SKU */}
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="stock"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Stock Quantity</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          min={1}
+                          value={field.value ?? ""}
+                          onChange={(e) =>
+                            field.onChange(Number(e.target.value) || 1)
+                          }
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="sku"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>SKU</FormLabel>
+                      <FormControl>
+                        <Input placeholder="SKU" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              {/* Featured Image */}
               <FormField
                 control={form.control}
-                name="price"
+                name="featuredImage"
+                render={({ field: { value, onChange, ...fieldProps } }) => (
+                  <FormItem>
+                    <FormLabel>Featured Image</FormLabel>
+                    <FormControl>
+                      <div className="space-y-2">
+                        {typeof value === "string" && value && (
+                          <div className="relative w-20 h-20 border rounded overflow-hidden">
+                            <img
+                              src={value}
+                              alt="Current featured"
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+                        )}
+                        <Input
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              onChange(file);
+                            }
+                          }}
+                          {...fieldProps}
+                        />
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* Featured Checkbox */}
+              <FormField
+                control={form.control}
+                name="isFeatured"
+                render={({ field }) => (
+                  <FormItem className="flex items-center space-x-2">
+                    <Checkbox
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                    <FormLabel className="!text-sm !font-medium leading-none">
+                      Mark as Featured Product
+                    </FormLabel>
+                  </FormItem>
+                )}
+              />
+
+              {/* Category */}
+              <FormField
+                control={form.control}
+                name="categoryId"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Price ($)</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="number"
-                        {...field}
-                        onChange={(e) => field.onChange(e.target.valueAsNumber)}
-                      />
-                    </FormControl>
+                    <FormLabel>Category</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      value={field.value}
+                      disabled={isCategoriesLoading}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select a category" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {isCategoriesLoading ? (
+                          <div className="py-6 text-center text-sm text-muted-foreground">
+                            Loading categories...
+                          </div>
+                        ) : categories.length === 0 ? (
+                          <div className="py-6 text-center text-sm text-muted-foreground">
+                            No categories found
+                          </div>
+                        ) : (
+                          categories.map((cat: any) => (
+                            <SelectItem key={cat.id} value={cat.id}>
+                              {cat.name}
+                            </SelectItem>
+                          ))
+                        )}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
                   </FormItem>
                 )}
               />
@@ -150,7 +331,7 @@ const EditProduct = ({ item, trigger }: Props) => {
 
         <DrawerFooter>
           <Button disabled={isLoading} onClick={form.handleSubmit(onSubmit)}>
-            {isLoading ? "Saving..." : "Update Plan"}
+            {isLoading ? "Saving..." : "Update Product"}
           </Button>
 
           <DrawerClose asChild>

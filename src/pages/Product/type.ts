@@ -32,7 +32,7 @@ export const ProductCreateSchema = z.object({
   discountPrice: z.number().min(0, "Discount price cannot be negative"),
   stock: z.number().min(1, "Stock must be at least 1"),
   sku: z.string().min(1, "SKU is required"),
-  featuredImage: z.string().url(),
+  featuredImage: z.any(),
   isFeatured: z.boolean(),
   categoryId: z.string().min(1, "Please select a category"),
 });
@@ -48,7 +48,7 @@ export const ProductEditSchema = z.object({
     .optional(),
   stock: z.number().min(1, "Stock must be at least 1").optional(),
   sku: z.string().min(1, "SKU is required").optional(),
-  featuredImage: z.string().url().optional(),
+  featuredImage: z.any().optional(),
   isFeatured: z.boolean().optional(),
   categoryId: z.string().min(1, "Please select a category").optional(),
 });

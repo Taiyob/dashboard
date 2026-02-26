@@ -1,34 +1,34 @@
 import React from "react";
 import { DataTable } from "../DataTable";
-import { useCategoriesQuery } from "@/features/Category/category";
-import { columns } from "../Users/Columns";
+import { useProductsQuery } from "@/features/Product/product";
+import { columns } from "./Columns";
 
 export default function ProductTable({
   searchQuery,
-  sortQuery,
-  sortOrder,
 }: {
   searchQuery: string;
-  sortQuery: string;
-  sortOrder: string;
 }) {
   const [pagination, setPagination] = React.useState({
     pageIndex: 0,
     pageSize: 10,
   });
 
-  const { data, isLoading } = useCategoriesQuery({
-    page: pagination.pageIndex + 1,
+  const queryParams: any = {
+    page: Math.max(1, pagination.pageIndex + 1),
     limit: pagination.pageSize,
-    search: searchQuery,
-    sortBy: sortQuery,
-    sortOrder,
-  });
+  };
 
-  console.log("[product data]", data?.data);
+  if (searchQuery) queryParams.search = searchQuery;
 
-  const totalRows = data?.meta?.pagination?.total ?? 0;
-  const totalPages = Math.ceil(totalRows / pagination.pageSize);
+  const { data, isLoading, error } = useProductsQuery(queryParams);
+
+  if (error) {
+    console.error("[Product Table Error]:", JSON.stringify(error, null, 2));
+  }
+  console.log("[Product Table Request Params]:", queryParams);
+
+  const totalRows = (data as any)?.meta?.pagination?.total ?? 0;
+  const totalPages = (data as any)?.meta?.pagination?.totalPages ?? 0;
 
   return (
     <div className="overflow-hidden rounded-md border">

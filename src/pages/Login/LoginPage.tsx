@@ -18,7 +18,7 @@ export default function LoginPage() {
                 <span className="text-primary">Welcome</span> back to the
                 <span className="text-primary">
                   {' '}
-                  OnSchedule Admin Dashboard
+                  Personal Care Admin Dashboard
                 </span>
                 . Log in to efficiently manage{' '}
                 <span className="font-medium">users</span>,

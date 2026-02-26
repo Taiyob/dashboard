@@ -45,6 +45,7 @@ export const FromLogin = () => {
           <Input
             id="email"
             type="email"
+            value="admin@gmail.com"
             placeholder="Enter your email..."
             className="h-14 text-base rounded-xl border-border focus:border-primary"
             {...register('email')}
@@ -61,6 +62,7 @@ export const FromLogin = () => {
             <Input
               id="password"
               type={showPassword ? 'text' : 'password'}
+              value="NewPass789"
               placeholder="Enter your password..."
               className="h-14 text-base rounded-xl pr-12"
               {...register('password')}
