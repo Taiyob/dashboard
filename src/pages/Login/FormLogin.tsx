@@ -1,10 +1,10 @@
-import {Button} from '@/components/ui/button';
-import {Input} from '@/components/ui/input';
-import {Label} from '@/components/ui/label';
-import {Checkbox} from '@/components/ui/checkbox';
-import {Eye, EyeOff} from 'lucide-react';
-import {NavLink} from 'react-router';
-import {useLoginForm} from './UseLoginForm';
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Eye, EyeOff } from "lucide-react";
+import { NavLink } from "react-router";
+import { useLoginForm } from "./UseLoginForm";
 
 export const FromLogin = () => {
   const {
@@ -48,7 +48,7 @@ export const FromLogin = () => {
             value="admin@gmail.com"
             placeholder="Enter your email..."
             className="h-14 text-base rounded-xl border-border focus:border-primary"
-            {...register('email')}
+            {...register("email")}
           />
           {errors.email && (
             <p className="text-sm text-chart-1">{errors.email.message}</p>
@@ -61,18 +61,19 @@ export const FromLogin = () => {
           <div className="relative">
             <Input
               id="password"
-              type={showPassword ? 'text' : 'password'}
+              type={showPassword ? "text" : "password"}
               value="NewPass789"
               placeholder="Enter your password..."
               className="h-14 text-base rounded-xl pr-12"
-              {...register('password')}
+              {...register("password")}
             />
             <Button
               type="button"
               variant="ghost"
               size="icon"
               className="absolute right-2 top-1/2 -translate-y-1/2 hover:bg-transparent"
-              onClick={togglePasswordVisibility}>
+              onClick={togglePasswordVisibility}
+            >
               {showPassword ? (
                 <EyeOff className="w-5 h-5 text-muted-foreground" />
               ) : (
@@ -90,15 +91,16 @@ export const FromLogin = () => {
           <Checkbox
             id="terms"
             defaultChecked={true}
-            onCheckedChange={(checked) => setValue('terms', checked as boolean)}
+            onCheckedChange={(checked) => setValue("terms", checked as boolean)}
           />
           <div className="space-y-1">
             <Label
               htmlFor="terms"
-              className="text-sm text-muted-foreground font-normal cursor-pointer">
-              I agree to OnSchedule's{' '}
+              className="text-sm text-muted-foreground font-normal cursor-pointer"
+            >
+              I agree to Dashboard's{" "}
               <span className="text-primary underline">Terms of Use</span> and
-              acknowledge our{' '}
+              acknowledge our{" "}
               <span className="text-primary underline">Privacy Policy</span>.
             </Label>
             {errors.terms && (
@@ -111,14 +113,16 @@ export const FromLogin = () => {
         <Button
           type="submit"
           // disabled={isLoading}
-          className="w-full h-14 text-lg font-medium bg-primary hover:bg-primary/80 rounded-xl shadow-lg transition-all disabled:opacity-50 text-white">
-          {isLoading ? 'Logging In...' : 'Log In'}
+          className="w-full h-14 text-lg font-medium bg-primary hover:bg-primary/80 rounded-xl shadow-lg transition-all disabled:opacity-50 text-white"
+        >
+          {isLoading ? "Logging In..." : "Log In"}
         </Button>
 
         <div className="text-center">
           <NavLink
-            to={'/forgot-password'}
-            className="text-sm text-primary font-medium hover:underline">
+            to={"/forgot-password"}
+            className="text-sm text-primary font-medium hover:underline"
+          >
             Forgot your password?
           </NavLink>
         </div>

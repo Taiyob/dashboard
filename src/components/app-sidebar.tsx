@@ -47,16 +47,6 @@ const data = {
       url: "/dashboard/products",
       icon: IconBrandProducthunt,
     },
-    // {
-    //   title: "Clients",
-    //   url: "/dashboard/clients",
-    //   icon: IconMessageUser,
-    // },
-    // {
-    //   title: "Employees",
-    //   url: "/dashboard/employees",
-    //   icon: IconListCheck,
-    // },
   ],
 };
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
@@ -71,9 +61,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             >
               <Link to="/dashboard">
                 <CalendarCheck />
-
                 <span className="text-base font-semibold">
-                  On<span className="text-primary">Schedule</span>
+                  Health<span className="text-primary">Care</span>
                 </span>
               </Link>
             </SidebarMenuButton>

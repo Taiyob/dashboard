@@ -40,8 +40,6 @@ export default function ProductTable({
     queryParams.order = sortOrder;
   }
 
-  // Optional: Default sorting যদি কোনো sort না দেওয়া থাকে
-  // (অনেক সময় নতুন প্রোডাক্ট প্রথমে দেখাতে চাই)
   if (!sortQuery) {
     queryParams.sortBy = "createdAt";
     queryParams.order = "desc";
@@ -59,7 +57,6 @@ export default function ProductTable({
   const totalRows = (data as any)?.meta?.pagination?.total ?? 0;
   const totalPages = (data as any)?.meta?.pagination?.totalPages ?? 0;
 
-  // Optional: Error UI দেখানো (ভালো UX-এর জন্য)
   if (isError) {
     return (
       <div className="p-6 text-center text-red-600 border border-red-200 rounded-md bg-red-50">
