@@ -40,7 +40,7 @@ export const categoriesApi = createApi({
         method: "PUT",
         data,
       }),
-      invalidatesTags: (result, error, { id }) => [
+      invalidatesTags: (_result, _error, { id }) => [
         { type: "Category", id },
         { type: "Category", id: "LIST" },
       ],
@@ -52,7 +52,7 @@ export const categoriesApi = createApi({
         method: "PATCH",
         data: { status },
       }),
-      invalidatesTags: (result, error, { id }) => [
+      invalidatesTags: (_result, _error, { id }) => [
         { type: "Category", id },
         { type: "Category", id: "LIST" },
       ],
@@ -63,7 +63,7 @@ export const categoriesApi = createApi({
         url: `/categories/${id}`,
         method: "DELETE",
       }),
-      invalidatesTags: (result, error, id) => [
+      invalidatesTags: (_result, _error, id) => [
         { type: "Category", id },
         { type: "Category", id: "LIST" },
       ],

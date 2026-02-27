@@ -5,8 +5,12 @@ import { columns } from "./Columns";
 
 export default function ProductTable({
   searchQuery,
+  sortQuery,
+  sortOrder,
 }: {
   searchQuery: string;
+  sortQuery: string;
+  sortOrder: "asc" | "desc";
 }) {
   const [pagination, setPagination] = React.useState({
     pageIndex: 0,
@@ -19,6 +23,8 @@ export default function ProductTable({
   };
 
   if (searchQuery) queryParams.search = searchQuery;
+  if (sortQuery) queryParams.sortBy = sortQuery;
+  if (sortOrder) queryParams.sortOrder = sortOrder;
 
   const { data, isLoading, error } = useProductsQuery(queryParams);
 
