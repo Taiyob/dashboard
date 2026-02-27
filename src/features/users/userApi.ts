@@ -1,5 +1,5 @@
-import {axiosBaseQuery} from '@/app/axiosBaseQuery';
-import {createApi} from '@reduxjs/toolkit/query/react';
+import { axiosBaseQuery } from '@/app/axiosBaseQuery';
+import { createApi } from '@reduxjs/toolkit/query/react';
 
 export const userApi = createApi({
   reducerPath: 'userApi', // More specific name to avoid conflicts
@@ -9,9 +9,9 @@ export const userApi = createApi({
     // Authentication endpoints
     users: builder.query({
       query: (params) => ({
-        url: '/users',
+        url: '/users/users', // Based on AuthModule mounting /api/users -> authRoutes, and authRoutes having /users
         method: 'GET',
-        params: {...params},
+        params: { ...params },
       }),
       providesTags: ['User'],
     }),
@@ -25,7 +25,7 @@ export const userApi = createApi({
     }),
 
     updateUser: builder.mutation({
-      query: ({id, data}) => ({
+      query: ({ id, data }) => ({
         url: `/users/${id}`,
         method: 'PATCH',
         data,
@@ -40,6 +40,15 @@ export const userApi = createApi({
       }),
       invalidatesTags: ['User'],
     }),
+
+    updateUserStatus: builder.mutation({
+      query: ({ userId, status }) => ({
+        url: `/users/${userId}/status`,
+        method: 'PATCH',
+        data: { status },
+      }),
+      invalidatesTags: ['User'],
+    }),
   }),
 });
 
@@ -48,4 +57,5 @@ export const {
   useUserQuery,
   useDeleteUserMutation,
   useUpdateUserMutation,
+  useUpdateUserStatusMutation,
 } = userApi;

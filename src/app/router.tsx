@@ -8,6 +8,7 @@ import Epmloyees from "@/pages/Epmloyees/Epmloyees";
 import Courses from "@/pages/Course/Courses";
 import Category from "@/pages/Category/Category";
 import Product from "@/pages/Product/Product";
+import Orders from "@/pages/Orders/Orders";
 import { ProtectedRoute } from "@/layout/protected-route";
 import { PublicRoute } from "@/layout/public-route";
 
@@ -56,6 +57,10 @@ const router = createBrowserRouter([
       {
         path: "products",
         element: <Product />,
+      },
+      {
+        path: "orders",
+        element: <Orders />,
       },
       {
         path: "clients",

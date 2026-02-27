@@ -47,6 +47,11 @@ const data = {
       url: "/dashboard/products",
       icon: IconBrandProducthunt,
     },
+    {
+      title: "Orders",
+      url: "/dashboard/orders",
+      icon: IconReceipt2,
+    },
   ],
 };
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {

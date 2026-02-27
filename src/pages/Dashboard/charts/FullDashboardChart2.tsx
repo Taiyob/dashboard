@@ -78,7 +78,7 @@ export default function FullDashboardCharts2({
 
   // Format growth data for stacked bar chart
   const formatGrowthData = () => {
-    return dashboard.growth.map((item) => ({
+    return (dashboard.growth || []).map((item) => ({
       month: item.month,
       Clients: item.clients,
       Users: item.users,
@@ -88,14 +88,14 @@ export default function FullDashboardCharts2({
   // Format user activity for pie chart
   const formatUserActivity = () => {
     return [
-      {name: 'Active', value: dashboard.userActivity.active},
-      {name: 'Inactive', value: dashboard.userActivity.inactive},
+      { name: 'Active', value: dashboard.userActivity?.active || 0 },
+      { name: 'Inactive', value: dashboard.userActivity?.inactive || 0 },
     ];
   };
 
   // Format top clients
   const formatTopClients = () => {
-    return dashboard.topClientsByEmployees.map((client) => ({
+    return (dashboard.topClientsByEmployees || []).map((client) => ({
       name:
         client.client.length > 15
           ? `${client.client.substring(0, 15)}...`
@@ -105,13 +105,13 @@ export default function FullDashboardCharts2({
   };
 
   // Custom tooltip for charts
-  const CustomTooltip = ({active, payload, label}: any) => {
+  const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
       return (
         <div className="bg-white p-3 border rounded-lg shadow-lg">
           <p className="font-semibold text-gray-800">{label}</p>
           {payload.map((entry: any, index: number) => (
-            <p key={index} style={{color: entry.color}} className="text-sm">
+            <p key={index} style={{ color: entry.color }} className="text-sm">
               {entry.name}: {entry.value}
             </p>
           ))}
@@ -134,14 +134,14 @@ export default function FullDashboardCharts2({
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart
                 data={formatGrowthData()}
-                margin={{top: 10, right: 30, left: 0, bottom: 0}}>
+                margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                 <XAxis
                   dataKey="month"
-                  tick={{fill: '#666'}}
-                  axisLine={{stroke: '#ddd'}}
+                  tick={{ fill: '#666' }}
+                  axisLine={{ stroke: '#ddd' }}
                 />
-                <YAxis tick={{fill: '#666'}} axisLine={{stroke: '#ddd'}} />
+                <YAxis tick={{ fill: '#666' }} axisLine={{ stroke: '#ddd' }} />
                 <Tooltip content={<CustomTooltip />} />
                 <Legend />
                 <Area
@@ -181,13 +181,13 @@ export default function FullDashboardCharts2({
                   cx="50%"
                   cy="50%"
                   labelLine={false}
-                  label={({name, percent}) =>
+                  label={({ name, percent }) =>
                     `${name}: ${(percent * 100).toFixed(0)}%`
                   }
                   outerRadius={80}
                   fill="#8884d8"
                   dataKey="value">
-                  {dashboard.planDistribution.map((_entry, index) => (
+                  {(dashboard.planDistribution || []).map((_entry, index) => (
                     <Cell
                       key={`cell-${index}`}
                       fill={COLORS[index % COLORS.length]}
@@ -238,8 +238,8 @@ export default function FullDashboardCharts2({
                   textAnchor="middle"
                   dominantBaseline="middle"
                   className="text-lg font-bold">
-                  {dashboard.userActivity.active +
-                    dashboard.userActivity.inactive}
+                  {(dashboard.userActivity?.active || 0) +
+                    (dashboard.userActivity?.inactive || 0)}
                   <tspan
                     x="50%"
                     dy="1.2em"
@@ -264,16 +264,16 @@ export default function FullDashboardCharts2({
             <ResponsiveContainer width="100%" height="100%">
               <BarChart
                 data={formatTopClients()}
-                margin={{top: 20, right: 30, left: 20, bottom: 60}}>
+                margin={{ top: 20, right: 30, left: 20, bottom: 60 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                 <XAxis
                   dataKey="name"
                   angle={-45}
                   textAnchor="end"
                   height={60}
-                  tick={{fill: '#666', fontSize: 12}}
+                  tick={{ fill: '#666', fontSize: 12 }}
                 />
-                <YAxis tick={{fill: '#666'}} />
+                <YAxis tick={{ fill: '#666' }} />
                 <Tooltip
                   formatter={(value) => [`${value} employees`, 'Count']}
                   contentStyle={{
@@ -299,19 +299,19 @@ export default function FullDashboardCharts2({
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart
-                data={dashboard.newClientsTrend}
-                margin={{top: 5, right: 30, left: 20, bottom: 5}}>
+                data={dashboard.newClientsTrend || []}
+                margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                <XAxis dataKey="month" tick={{fill: '#666'}} />
-                <YAxis tick={{fill: '#666'}} />
+                <XAxis dataKey="month" tick={{ fill: '#666' }} />
+                <YAxis tick={{ fill: '#666' }} />
                 <Tooltip content={<CustomTooltip />} />
                 <Line
                   type="monotone"
                   dataKey="count"
                   stroke="#FF8042"
                   strokeWidth={2}
-                  dot={{r: 4}}
-                  activeDot={{r: 6}}
+                  dot={{ r: 4 }}
+                  activeDot={{ r: 6 }}
                   name="New Clients"
                 />
               </LineChart>
