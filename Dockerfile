@@ -5,49 +5,42 @@ FROM oven/bun:latest AS builder
 # Set the working directory
 WORKDIR /app
 
-# Copy package.json and bun.lockb (Bun's lockfile)
+# Copy package.json
 COPY package.json ./
 
 # Install dependencies using the frozen lockfile
-# 1. Install production deps
-RUN bun install --frozen-lockfile --production
-
-# 2. ADD THIS LINE: Explicitly install typescript for next.config.ts support
-RUN bun add -d typescript
+# We install all dependencies (including dev) to ensure tsc and vite are available for build
+RUN bun install --frozen-lockfile
 
 # Copy the rest of the application source code
 COPY . .
 
-# Build the Next.js application
+# Build the Vite application
 RUN bun run build
 
-
 # --- Stage 2: Runner ---
-# Use a fresh Bun image for the final, lean production image
-FROM oven/bun:latest
+# Use Nginx to serve the static Vite bundle
+FROM nginx:alpine
 
-# Set the working directory
-WORKDIR /app
+# Copy the built Vite application assets from the builder stage
+COPY --from=builder /app/dist /usr/share/nginx/html
 
-# Set environment variables
-ENV NODE_ENV=production
-ENV PORT=3000
-ENV NEXT_PUBLIC_PACKAGE_MANAGER=bun
+# Optional: if you have a custom nginx.conf or need client-side routing, you might need an nginx config.
+# For standard React app with React Router, a simple configuration is usually needed, 
+# but for basic usage the default nginx setup might work. If React Router history mode is used,
+# uncomment the specific commands below to provide a fallback to index.html.
 
-# Copy only the necessary production dependencies configuration
-COPY --from=builder /app/package.json ./package.json
+RUN echo "server { \
+    listen 80; \
+    location / { \
+        root   /usr/share/nginx/html; \
+        index  index.html index.htm; \
+        try_files \$uri \$uri/ /index.html; \
+    } \
+}" > /etc/nginx/conf.d/default.conf
 
-# Install *only* production dependencies
-RUN bun install --frozen-lockfile --production && \
-  bun add -d typescript
+# Expose port 80
+EXPOSE 80
 
-# Copy the built Next.js application assets from the builder stage
-COPY --from=builder /app/.next ./.next
-COPY --from=builder /app/public ./public
-COPY --from=builder /app/next.config.ts ./next.config.ts
-
-# Expose the port the app will run on
-EXPOSE 3000
-
-# The command to start the Next.js server using Bun
-CMD ["bun", "run", "start"]
+# The command to start Nginx
+CMD ["nginx", "-g", "daemon off;"]
