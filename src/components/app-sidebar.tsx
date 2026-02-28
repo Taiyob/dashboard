@@ -4,6 +4,7 @@ import {
   IconUsers,
   IconReceipt2,
   IconBrandProducthunt,
+  IconMessage,
 } from "@tabler/icons-react";
 
 import { NavMain } from "@/components/nav-main";
@@ -51,6 +52,11 @@ const data = {
       title: "Orders",
       url: "/dashboard/orders",
       icon: IconReceipt2,
+    },
+    {
+      title: "Reviews",
+      url: "/dashboard/reviews",
+      icon: IconMessage,
     },
   ],
 };

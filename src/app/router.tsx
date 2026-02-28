@@ -9,6 +9,7 @@ import Courses from "@/pages/Course/Courses";
 import Category from "@/pages/Category/Category";
 import Product from "@/pages/Product/Product";
 import Orders from "@/pages/Orders/Orders";
+import Reviews from "@/pages/Reviews/Reviews";
 import { ProtectedRoute } from "@/layout/protected-route";
 import { PublicRoute } from "@/layout/public-route";
 
@@ -61,6 +62,10 @@ const router = createBrowserRouter([
       {
         path: "orders",
         element: <Orders />,
+      },
+      {
+        path: "reviews",
+        element: <Reviews />,
       },
       {
         path: "clients",

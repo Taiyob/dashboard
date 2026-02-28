@@ -15,6 +15,7 @@ import { statsApi } from "@/features/stats/statsApi";
 import { assignmentApi } from "@/features/assignment/assignmentApi";
 import { categoriesApi } from "@/features/Category/category";
 import { orderApi } from "@/features/order/orderApi";
+import { reviewApi } from "@/features/review/reviewApi";
 //import { productsApi } from "@/features/Product/product";
 
 import {
@@ -57,6 +58,7 @@ export const store = configureStore({
     [certificateApi.reducerPath]: certificateApi.reducer,
     [productsApi.reducerPath]: productsApi.reducer,
     [orderApi.reducerPath]: orderApi.reducer,
+    [reviewApi.reducerPath]: reviewApi.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
@@ -80,6 +82,7 @@ export const store = configureStore({
       assignmentApi.middleware,
       statsApi.middleware,
       orderApi.middleware,
+      reviewApi.middleware,
     ]),
 });
 
